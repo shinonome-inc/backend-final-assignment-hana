@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Twitter Clone{% endblock %}</title>
+</head>
+
+<body>
+    <header>
+        <div class="headerlogo">Twitter Clone</div>
+        <a href="{% url 'accounts:signup' %}"><button>登録</button></a>
+    </header>
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>
