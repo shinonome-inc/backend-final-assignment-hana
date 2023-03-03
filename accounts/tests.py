@@ -111,7 +111,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
+        self.assertEqual(form.errors["username"], ["同じユーザー名が既に登録済みです。"])
+        # self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
 
     def test_failure_post_with_invalid_email(self):
         data_invalid_email = {
@@ -126,7 +127,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("有効なメールアドレスを入力してください。", form.errors["email"])
+        self.assertEqual(form.errors["email"], ["有効なメールアドレスを入力してください。"])
+        # self.assertIn("有効なメールアドレスを入力してください。", form.errors["email"])
 
     def test_failure_post_with_too_short_password(self):
         data_too_short_password = {
@@ -141,7 +143,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("このパスワードは短すぎます。最低 8 文字以上必要です。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["このパスワードは短すぎます。最低 8 文字以上必要です。", "このパスワードは一般的すぎます。"])
+        # self.assertIn("このパスワードは短すぎます。最低 8 文字以上必要です。", form.errors["password2"])
 
     def test_failure_post_with_password_similar_to_username(self):
         data_similar_to_username = {
@@ -157,7 +160,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["このパスワードは ユーザー名 と似すぎています。"])
+        # self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
 
     def test_failure_post_with_only_numbers_password(self):
         data_number_password = {
@@ -172,7 +176,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("このパスワードは数字しか使われていません。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["このパスワードは一般的すぎます。", "このパスワードは数字しか使われていません。"])
+        # self.assertEqual(form.errors["password2"], ["このパスワードは数字しか使われていません。"])
 
     def test_failure_post_with_mismatch_password(self):
         data_mismatch_password = {
@@ -187,7 +192,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["確認用パスワードが一致しません。"])
+        # self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
 
 
 class TestLoginView(TestCase):
