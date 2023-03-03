@@ -6,11 +6,7 @@
 <div>
     <h1>プロフィール</h1>
     <div>
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <p>ユーザー名：{{user.username}}</p>
-        </form>
+        <p>ユーザー名：{{user.username}}</p>
     </div>
 </div>
 {% endblock %}
