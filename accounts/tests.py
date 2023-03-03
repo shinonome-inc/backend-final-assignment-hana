@@ -1,7 +1,7 @@
+from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.conf import settings
 
 User = get_user_model()
 
@@ -282,6 +282,7 @@ class TestLogoutView(TestCase):
             target_status_code=200,
         )
         self.assertNotIn(SESSION_KEY, self.client.session)
+
 
 class TestUserProfileView(TestCase):
     def test_success_get(self):
