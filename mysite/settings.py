@@ -56,6 +56,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "mysite.urls"
 
+# "DIRS": ["mysite / templates"]
+# "DIRS": [os.path.join(BASE_DIR , "templates")],
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -126,3 +129,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "tweets:home"
+LOGOUT_REDIRECT_URL = "welcome:index"

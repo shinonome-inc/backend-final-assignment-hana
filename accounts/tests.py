@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -24,7 +25,8 @@ class TestSignUpView(TestCase):
         response = self.client.post(self.url, data)
         self.assertRedirects(
             response,
-            reverse("tweets:home"),
+            reverse(settings.LOGIN_REDIRECT_URL),
+            # reverse("tweets:home"),
             status_code=302,
             target_status_code=200,
         )
@@ -110,7 +112,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
+        self.assertEqual(form.errors["username"], ["同じユーザー名が既に登録済みです。"])
+        # self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
 
     def test_failure_post_with_invalid_email(self):
         data_invalid_email = {
@@ -125,7 +128,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("有効なメールアドレスを入力してください。", form.errors["email"])
+        self.assertEqual(form.errors["email"], ["有効なメールアドレスを入力してください。"])
+        # self.assertIn("有効なメールアドレスを入力してください。", form.errors["email"])
 
     def test_failure_post_with_too_short_password(self):
         data_too_short_password = {
@@ -140,7 +144,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("このパスワードは短すぎます。最低 8 文字以上必要です。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["このパスワードは短すぎます。最低 8 文字以上必要です。", "このパスワードは一般的すぎます。"])
+        # self.assertIn("このパスワードは短すぎます。最低 8 文字以上必要です。", form.errors["password2"])
 
     def test_failure_post_with_password_similar_to_username(self):
         data_similar_to_username = {
@@ -156,7 +161,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["このパスワードは ユーザー名 と似すぎています。"])
+        # self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
 
     def test_failure_post_with_only_numbers_password(self):
         data_number_password = {
@@ -171,7 +177,8 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("このパスワードは数字しか使われていません。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["このパスワードは一般的すぎます。", "このパスワードは数字しか使われていません。"])
+        # self.assertEqual(form.errors["password2"], ["このパスワードは数字しか使われていません。"])
 
     def test_failure_post_with_mismatch_password(self):
         data_mismatch_password = {
@@ -186,26 +193,102 @@ class TestSignUpView(TestCase):
 
         form = response.context["form"]
         self.assertFalse(form.is_valid())
-        self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
+        self.assertEqual(form.errors["password2"], ["確認用パスワードが一致しません。"])
+        # self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
 
 
 class TestLoginView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="test",
+            email="testemail@gmail.com",
+            password="password1",
+        )
+        self.url = reverse("accounts:login")
+
     def test_success_get(self):
-        pass
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/login.html")
 
     def test_success_post(self):
-        pass
+        valid_data = {
+            "username": "test",
+            "password": "password1",
+        }
+
+        response = self.client.post(self.url, valid_data)
+
+        self.assertRedirects(
+            response,
+            reverse(settings.LOGIN_REDIRECT_URL),
+            status_code=302,
+            target_status_code=200,
+        )
+        self.assertFalse(
+            User.objects.filter(
+                username=valid_data["username"],
+                email=valid_data["password"],
+            ).exists()
+        )
+        self.assertIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_not_exists_user(self):
-        pass
+        not_exists_user_data = {
+            "username": "nottest",
+            "password": "password1",
+        }
+        response = self.client.post(self.url, not_exists_user_data)
+        form = response.context["form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            User.objects.filter(
+                username=not_exists_user_data["username"],
+                password=not_exists_user_data["password"],
+            ).exists()
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors["__all__"],
+            ["正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。"],
+        )
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_failure_post_with_empty_password(self):
-        pass
+        empty_password_data = {
+            "username": "test",
+            "password": "",
+        }
+        response = self.client.post(self.url, empty_password_data)
+        form = response.context["form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            User.objects.filter(
+                password=empty_password_data["password"],
+            ).exists()
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["password"], ["このフィールドは必須です。"])
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 class TestLogoutView(TestCase):
+    def setUp(self):
+        self.user = {
+            "username": "test",
+            "password": "password1",
+        }
+        self.client.login(username="test", password="password1")
+
     def test_success_get(self):
-        pass
+        response = self.client.post(reverse("accounts:logout"))
+        self.assertRedirects(
+            response,
+            reverse(settings.LOGOUT_REDIRECT_URL),
+            status_code=302,
+            target_status_code=200,
+        )
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 class TestUserProfileView(TestCase):
