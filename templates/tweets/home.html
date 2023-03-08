@@ -4,4 +4,14 @@
 
 {% block content %}
 <h1>Homeです</h1>
-{% endblock %}
+{% for tweet in tweet_list %}
+<div>
+    <p>投稿者 : {{ tweet.user }}</p>
+    <p>作成日時 : {{tweet.created_at}}</p>
+    <p>内容 : {{ tweet.content }}</p>
+    <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
+</div>
+{% endfor %}
+<p><a href="{% url 'tweets:create' %}"><button type="button">ツイートする</button></a></p>
+
+{% endblock content %}
