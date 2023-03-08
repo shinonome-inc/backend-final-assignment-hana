@@ -9,14 +9,11 @@ from tweets.models import Tweet
 
 from .forms import LoginForm, SignUpForm
 
-# from .models import Tweet
-
 
 class SignUpView(CreateView):
     form_class = SignUpForm
     template_name = "accounts/signup.html"
     success_url = reverse_lazy(settings.LOGIN_REDIRECT_URL)
-    # success_url = reverse_lazy("tweets:home")
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -32,14 +29,8 @@ class LoginView(auth_views.LoginView):
     template_name = "accounts/login.html"
 
 
-# template_name = "registration/login.html"
-
-
 class LogoutView(auth_views.LogoutView):
     pass
-
-
-# template_name = "accounts/login.html"
 
 
 class UserProfileView(LoginRequiredMixin, ListView):

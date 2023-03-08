@@ -5,20 +5,12 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView
 from .forms import TweetForm
 from .models import Tweet
 
-# , TemplateView
-
-
-# class HomeView(LoginRequiredMixin, TemplateView):
-# template_name = "tweets/home.html"
-
 
 class HomeView(LoginRequiredMixin, ListView):
     model = Tweet
     template_name = "tweets/home.html"
     ordering = "-created_at"
-    # model = Tweet
-    # template_name = "tweets/home.html"
-    # queryset = model.objects.select_related("user")
+    queryset = model.objects.select_related("user")
 
 
 class TweetCreateView(LoginRequiredMixin, CreateView):
@@ -35,21 +27,18 @@ class TweetCreateView(LoginRequiredMixin, CreateView):
 class TweetDetailView(LoginRequiredMixin, DetailView):
     template_name = "tweets/detail.html"
     model = Tweet
-    # queryset = Tweet.objects.select_related("user")
+    queryset = Tweet.objects.select_related("user")
 
 
 class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     template_name = "tweets/delete.html"
     model = Tweet
     success_url = reverse_lazy("tweets:home")
+    queryset = model.objects.select_related("user")
 
     def test_func(self, **kwargs):
-        # アクセスできるユーザーを制限
         tweet = self.get_object()
         return tweet.user == self.request.user
-
-    # def test_func(self):
-    # return self.request.user == self.get_object().user
 
 
 # Create your views here.
