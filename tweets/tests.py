@@ -27,7 +27,6 @@ class TestHomeView(TestCase):
 class TestTweetCreateView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="test", password="password1")
-
         self.client.login(username="test", password="password1")
 
     def test_success_get(self):
