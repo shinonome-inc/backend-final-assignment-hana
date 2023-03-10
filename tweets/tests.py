@@ -97,6 +97,7 @@ class TestTweetDeleteView(TestCase):
     def test_failure_post_with_not_exist_tweet(self):
         response = self.client.post(reverse("tweets:delete", kwargs={"pk": 1000}))
         self.assertEqual(response.status_code, 404)
+        self.assertTrue(Tweet.objects.filter(content="aiueo").exists())
 
     def test_failure_post_with_incorrect_user(self):
         response = self.client.post(reverse("tweets:delete", kwargs={"pk": self.objects2.pk}))
