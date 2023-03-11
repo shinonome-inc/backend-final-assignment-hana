@@ -3,10 +3,20 @@
 {% block title %}プロフィール{% endblock %}
 
 {% block content %}
+
+<a href="{% url 'tweets:home' %}"><button type="button">ホームへ戻る</button></a>
+<h1>{{user.username}}のプロフィール</h1>
 <div>
-    <h1>プロフィール</h1>
+    {{tweets_list}}
+    <h3>過去のツイート一覧</h3>
+    {% for tweet in tweets_list %}
     <div>
-        <p>ユーザー名：{{user.username}}</p>
+        <p>投稿者 : {{ tweet.user }}</p>
+        <p>作成日時 : {{tweet.created_at}}</p>
+        <p>内容 : {{ tweet.content }}</p>
+        <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
     </div>
-</div>
-{% endblock %}
+
+    {% endfor %}
+
+    {% endblock %}

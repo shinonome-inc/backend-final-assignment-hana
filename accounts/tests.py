@@ -3,6 +3,8 @@ from django.contrib.auth import SESSION_KEY, get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from tweets.models import Tweet
+
 User = get_user_model()
 
 
@@ -113,7 +115,6 @@ class TestSignUpView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["username"], ["同じユーザー名が既に登録済みです。"])
-        # self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
 
     def test_failure_post_with_invalid_email(self):
         data_invalid_email = {
@@ -129,7 +130,6 @@ class TestSignUpView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["email"], ["有効なメールアドレスを入力してください。"])
-        # self.assertIn("有効なメールアドレスを入力してください。", form.errors["email"])
 
     def test_failure_post_with_too_short_password(self):
         data_too_short_password = {
@@ -145,7 +145,6 @@ class TestSignUpView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["password2"], ["このパスワードは短すぎます。最低 8 文字以上必要です。", "このパスワードは一般的すぎます。"])
-        # self.assertIn("このパスワードは短すぎます。最低 8 文字以上必要です。", form.errors["password2"])
 
     def test_failure_post_with_password_similar_to_username(self):
         data_similar_to_username = {
@@ -162,7 +161,6 @@ class TestSignUpView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["password2"], ["このパスワードは ユーザー名 と似すぎています。"])
-        # self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
 
     def test_failure_post_with_only_numbers_password(self):
         data_number_password = {
@@ -178,7 +176,6 @@ class TestSignUpView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["password2"], ["このパスワードは一般的すぎます。", "このパスワードは数字しか使われていません。"])
-        # self.assertEqual(form.errors["password2"], ["このパスワードは数字しか使われていません。"])
 
     def test_failure_post_with_mismatch_password(self):
         data_mismatch_password = {
@@ -194,7 +191,6 @@ class TestSignUpView(TestCase):
         form = response.context["form"]
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors["password2"], ["確認用パスワードが一致しません。"])
-        # self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
 
 
 class TestLoginView(TestCase):
@@ -292,8 +288,20 @@ class TestLogoutView(TestCase):
 
 
 class TestUserProfileView(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            username="test1",
+            email="test@example.com",
+            password="password1",
+        )
+        self.client.login(username="test1", password="password1")
+        self.post = Tweet.objects.create(user=self.user1, content="aiueo")
+        self.url = reverse("accounts:user_profile", kwargs={"username": self.user1.username})
+
     def test_success_get(self):
-        pass
+        response = self.client.get(self.url)
+        context = response.context
+        self.assertQuerysetEqual(context["tweets_list"], Tweet.objects.filter(user=self.user1))
 
 
 class TestUserProfileEditView(TestCase):
