@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>フォロー一覧</h1>
+{% if following_list %}
+{% for follow in following_list %}
+<div>
+    <a href="{% url 'accounts:user_profile' follow.following.username %}">{{ follow.following }}</a>
+</div>
+{% endfor %}
+{% else %}
+<p>フォローしている人はいません</p>
+{% endif %}
+<a href="{{ request.META.HTTP_REFERER }}"><button type="button">戻る</button></a>
+{% endblock %}
