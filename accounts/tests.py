@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user_model
-from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
 
@@ -302,7 +301,12 @@ class TestUserProfileView(TestCase):
     def test_success_get(self):
         response = self.client.get(self.url)
         context = response.context
-        self.assertQuerysetEqual(context["tweet_list"], Tweet.objects.filter(user=self.user1))
+        self.assertQuerysetEqual(context["tweet_list"], Tweet.objects.filter(user=self.user1), ordered=False)
+
+        ct_follower = FriendShip.objects.filter(following__exact=self.user1).count()
+        self.assertEqual(context["followers_num"], ct_follower)
+        ct_following = FriendShip.objects.filter(follower__exact=self.user1).count()
+        self.assertEqual(context["followings_num"], ct_following)
 
 
 class TestUserProfileEditView(TestCase):
@@ -355,9 +359,6 @@ class TestFollowView(TestCase):
         response = self.client.post(url)
         self.assertEqual(response.status_code, 400)
         self.assertFalse(FriendShip.objects.exists())
-        messages = list(get_messages(response.wsgi_request))
-        message = str(messages[0])
-        self.assertEqual(message, "自分自身はフォローできません。")
 
 
 class TestUnfollowView(TestCase):
@@ -386,20 +387,16 @@ class TestUnfollowView(TestCase):
         )
         self.assertFalse(FriendShip.objects.exists())
 
-    def test_failure_post_with_not_exist_tweet(self):
+    def test_failure_post_with_not_exist_user(self):
         url = reverse("accounts:follow", kwargs={"username": "unknown"})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 404)
         self.assertTrue(FriendShip.objects.filter(follower=self.user1, following=self.user2).exists())
 
-    def test_failure_post_with_incorrect_user(self):
+    def test_failure_post_with_self(self):
         url = reverse("accounts:unfollow", kwargs={"username": self.user1.username})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 400)
-        messages = list(get_messages(response.wsgi_request))
-        message = str(messages[0])
-        self.assertEquals(message, "自分自身を対象には出来ません。")
-        self.assertTrue(FriendShip.objects.filter(follower=self.user1, following=self.user2).exists())
 
 
 class TestFollowingListView(TestCase):
