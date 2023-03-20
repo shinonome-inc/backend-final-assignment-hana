@@ -8,7 +8,7 @@
         href="{% url 'accounts:follower_list' user.username %}">{{ followers_num }}</a></p>
 {% if request.user == user %}
 <p>プロフィール</p>
-{% elif isfollowing %}
+{% elif is_following %}
 <form action="{% url 'accounts:unfollow' user.username %}" method="POST">
     {% csrf_token %}
     <button type="submit">フォロー解除</button>

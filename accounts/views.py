@@ -50,7 +50,7 @@ class UserProfileView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         user = get_object_or_404(User, username=self.kwargs["username"])
         context["tweet_list"] = Tweet.objects.select_related("user").filter(user=self.object).order_by("-created_at")
-        context["isfollowing"] = FriendShip.objects.filter(following=user, follower=self.request.user).exists()
+        context["is_following"] = FriendShip.objects.filter(following=user, follower=self.request.user).exists()
         context["followings_num"] = FriendShip.objects.filter(follower=self.object).count()
         context["followers_num"] = FriendShip.objects.filter(following=self.object).count()
         return context
