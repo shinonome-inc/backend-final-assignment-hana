@@ -411,6 +411,7 @@ class TestFollowingListView(TestCase):
             email="test2@example",
             password="password2",
         )
+
         self.client.login(username="test1", password="password1")
         FriendShip.objects.create(follower=self.user2, following=self.user1)
         self.url = reverse("accounts:following_list", kwargs={"username": self.user1.username})
@@ -419,6 +420,8 @@ class TestFollowingListView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/following_list.html")
+        follow_count = self.user2.following.count()
+        self.assertEqual(follow_count, 1)
 
 
 class TestFollowerListView(TestCase):
@@ -441,3 +444,5 @@ class TestFollowerListView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/follower_list.html")
+        follow_count = self.user1.following.count()
+        self.assertEqual(follow_count, 1)
