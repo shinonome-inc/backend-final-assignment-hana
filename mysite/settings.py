@@ -134,4 +134,15 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "tweets:home"
 LOGOUT_REDIRECT_URL = "welcome:index"
 
-AUTH_USER_MODEL = "accounts.User"
+SQL_DEBUG = False
+
+if SQL_DEBUG:
+
+    def show_toolbar(request):
+        return True
+
+    INSTALLED_APPS += ("debug_toolbar",)
+    MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+    }
