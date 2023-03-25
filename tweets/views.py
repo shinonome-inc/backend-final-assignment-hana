@@ -1,9 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, View
 
 from .forms import TweetForm
-from .models import Tweet
+from .models import Like, Tweet
 
 
 class HomeView(LoginRequiredMixin, ListView):
@@ -39,6 +40,42 @@ class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self, **kwargs):
         tweet = self.get_object()
         return tweet.user == self.request.user
+
+
+class LikeView(LoginRequiredMixin, View):
+    def post(self, request, *arg, **kwargs):
+        tweet_id = self.kwargs["pk"]
+        tweet = Tweet.objects.get(pk=tweet_id)
+        user = request.user
+        Like.objects.get_or_create(user=user, tweet=tweet)
+        like_count = tweet.likes.count()
+        context = {
+            "liked_count": like_count,
+            "tweet_id": tweet.id,
+            "is_liked": True,
+        }
+
+        return JsonResponse(context)
+
+
+class UnlikeView(LoginRequiredMixin, View):
+    def post(self, request, *arg, **kwargs):
+        tweet_id = self.kwargs["pk"]
+        tweet = Tweet.objects.get(pk=tweet_id)
+        user = request.user
+        like = Like.objects.filter(user=user, tweet=tweet)
+
+        if like.exists():
+            like.delete()
+
+        like_count = tweet.likes.count()
+
+        context = {
+            "like_count": like_count,
+            "tweet_id": tweet_id,
+            "is_liked": False,
+        }
+        return JsonResponse(context)
 
 
 # Create your views here.
