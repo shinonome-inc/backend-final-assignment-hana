@@ -10,9 +10,41 @@
     <p>作成日時 : {{tweet.created_at}}</p>
     <p>内容 : {{ tweet.content }}</p>
     <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
-    {% include 'tweets/like.html' %}
+    <span id="count_{{tweet.id}}">{{tweet.likes.count}}</span>
+    <button class="likebtn" data-pk="{{ tweet.pk }}"
+        data-is-liked="{% if tweet.pk in user_liked_list %}True{% else %}False{% endif %}" id="likebtn">
+
+
+
 </div>
 {% endfor %}
 <p><a href="{% url 'tweets:create' %}"><button type="button">ツイートする</button></a></p>
+<script>
+    function renderBtn(likeBtn) {
+        const isLiked = likeBtn.dataset.isLiked === 'True'
+        likeBtn.innerText = `${isLiked ? 'いいね解除' : 'いいね'} `
+    }
+
+    for (const likeBtn of document.getElementsByClassName('likebtn')) {
+        renderBtn(likeBtn)
+        likeBtn.addEventListener('click',
+            async () => {
+                const isLiked = likeBtn.dataset.isLiked === 'True'
+                const response = await fetch(
+                    `/tweets/${likeBtn.dataset.pk}/${isLiked ? 'unlike' : 'like'}/`,
+                    { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } },
+                )
+                const data = await response.json()
+                console.log(data)
+                likeBtn.dataset.isLiked = isLiked ? 'False' : 'True'
+                renderBtn(likeBtn)
+                const likeDisplay = document.querySelector("#count_" + likeBtn.dataset.pk)
+                likeDisplay.innerHTML = data.liked_count
+            }
+        )
+    }
+
+
+</script>
 
 {% endblock content %}
