@@ -1,9 +1,3 @@
-<span id="count_{{tweet.id}}">{{tweet.likes.count}}</span>
-<!-- <button class="likebtn" data-pk="{{ tweet.pk }}"
-    data-is-liked="{% if tweet.pk in user_liked_list %}True{% else %}False{% endif %}" id="likebtn">{% csrf_token %} -->
-
-<p>{{ user_liked_list }}</p>
-
 {% if tweet.id in user_liked_list %}
 <button id="tweet-{{tweet.id}}" class="likeBtn" data-url="{% url 'tweets:unlike' tweet.id %}" data-pk={{tweet.pk}}
     data-is-liked="true">いいね解除</button>
@@ -11,3 +5,4 @@
 <button id=" tweet-{{tweet.id}}" class="likeBtn" data-url=" {% url 'tweets:like' tweet.id %}" data-pk={{tweet.pk}}
     data-is-liked="false">いいね</button>
 {% endif %}
+<span id="count_{{tweet.id}}">{{tweet.likes.count}}</span>
