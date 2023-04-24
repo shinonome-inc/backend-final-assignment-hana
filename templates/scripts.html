@@ -9,7 +9,6 @@
                     { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } },
                 )
                 const data = await response.json()
-                console.log(data)
                 likeBtn.innerHTML = isLiked ? 'いいね' : 'いいね解除'
                 likeBtn.dataset.isLiked = isLiked ? 'false' : 'true'
                 const likeDisplay = document.querySelector("#count_" + likeBtn.dataset.pk)

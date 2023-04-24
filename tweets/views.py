@@ -15,7 +15,7 @@ class HomeView(LoginRequiredMixin, ListView):
     model = Tweet
     template_name = "tweets/home.html"
     ordering = "-created_at"
-    queryset = model.objects.select_related("user")
+    queryset = model.objects.select_related("user").prefetch_related("likes")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -56,16 +56,12 @@ class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class LikeView(LoginRequiredMixin, View):
     def post(self, request, *arg, **kwargs):
-        # tweet_id = self.kwargs["pk"]
-        # tweet = Tweet.objects.get(pk=tweet_id)
         tweet = get_object_or_404(Tweet, pk=kwargs["pk"])
         user = request.user
         Like.objects.get_or_create(user=user, tweet=tweet)
         like_count = tweet.likes.count()
         context = {
             "liked_count": like_count,
-            "tweet_id": tweet.id,
-            "is_liked": True,
         }
 
         return JsonResponse(context)
@@ -73,7 +69,6 @@ class LikeView(LoginRequiredMixin, View):
 
 class UnlikeView(LoginRequiredMixin, View):
     def post(self, request, *arg, **kwargs):
-        tweet_id = self.kwargs["pk"]
         tweet = get_object_or_404(Tweet, pk=kwargs["pk"])
         user = request.user
         like = Like.objects.filter(user=user, tweet=tweet)
@@ -85,8 +80,6 @@ class UnlikeView(LoginRequiredMixin, View):
 
         context = {
             "liked_count": like_count,
-            "tweet_id": tweet_id,
-            "is_liked": False,
         }
         return JsonResponse(context)
 
