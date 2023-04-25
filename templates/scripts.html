@@ -1,0 +1,21 @@
+<script>
+    for (const likeBtn of document.getElementsByClassName('likeBtn')) {
+
+        likeBtn.addEventListener('click',
+            async () => {
+                const isLiked = likeBtn.dataset.isLiked === 'true'
+                const response = await fetch(
+                    `/tweets/${likeBtn.dataset.pk}/${isLiked ? 'unlike' : 'like'}/`,
+                    { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } },
+                )
+                const data = await response.json()
+                likeBtn.innerHTML = isLiked ? 'いいね' : 'いいね解除'
+                likeBtn.dataset.isLiked = isLiked ? 'false' : 'true'
+                const likeDisplay = document.querySelector("#count_" + likeBtn.dataset.pk)
+                likeDisplay.innerHTML = data.liked_count
+            }
+        )
+    }
+
+
+</script>

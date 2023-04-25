@@ -28,6 +28,7 @@
     <p>作成日時 : {{ tweet.created_at }}</p>
     <p>内容 : {{ tweet.content }}</p>
     <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
+    {% include 'tweets/like.html' %}
 </div>
 {% endfor %}
 {% endblock %}

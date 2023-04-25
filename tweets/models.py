@@ -11,6 +11,16 @@ class Tweet(models.Model):
         return self.content
 
 
+class Like(models.Model):
+    tweet = models.ForeignKey(Tweet, related_name="likes", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="likes", on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["tweet", "user"], name="like_unique"),
+        ]
+
+
 # from django.db import models
 
 # class Tweet(models.Model):
